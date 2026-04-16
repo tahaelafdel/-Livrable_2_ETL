@@ -1,94 +1,92 @@
-# Création du Data Lake pour ImmoVision 360 (Optimisé Cloud)
+# ImmoVision 360 - Livrable Phase 2 : Pipeline ETL & Enrichissement IA
 
-## 1. Contexte et Objectifs
-Ce projet a pour objectif la mise en place d'un Data Lake robuste en vue d'alimenter la Phase 2 du projet **ImmoVision 360** (analyse par IA multimodale : Vision et NLP). 
+Ce dépôt contient l'infrastructure logicielle permettant de transformer un **Data Lake** brut (Zone Bronze) en un **Data Warehouse** structuré et enrichi (Zone Silver) pour le quartier de l'Élysée à Paris.
 
-Les données proviennent initialement de catalogues Open Data (Inside Airbnb). Afin d'optimiser le stockage et la pertinence de l'analyse, l'ingestion a été ciblée sur un périmètre géographique strict (quartier "Élysée"). Les images ont été aspirées, redimensionnées et standardisées, tandis que les avis textuels ont été nettoyés et agrégés par annonce, constituant ainsi un corpus de qualité, prêt pour l'analyse algorithmique.
-
----
-
-## 2. Optimisation des Performances (Cloud & Parallélisme)
-Initialement, le traitement séquentiel (une image à la fois avec délai de courtoisie) était trop lent pour un usage industriel. Le pipeline a été migré vers **Google Colab** pour bénéficier de la puissance du Cloud et de la bande passante réseau de Google.
-
-**Améliorations majeures :**
-- **Exécution sur Google Colab :** Utilisation d'instances distantes pour accélérer les téléchargements et le traitement CPU.
-- **Multithreading (Parallélisme) :** Refactorisation de `01_ingestion_images.py` avec `ThreadPoolExecutor` (10 workers) pour télécharger plusieurs images simultanément.
-- **Optimisation Pandas :** Refactorisation de `02_ingestion_texts.py` utilisant `pandas` pour une lecture par "chunks" de 100 000 lignes, permettant de traiter des fichiers CSV massifs sans saturer la mémoire vive.
+## 🚀 Vision du Projet
+L'objectif est de passer de données CSV "muettes" (70+ colonnes) à une base de données **PostgreSQL** "intelligente". Grâce à l'utilisation de l'IA (modèles de Vision et NLP), nous extrayons des indicateurs stratégiques sur la standardisation des logements et l'impact social des locations courte durée.
 
 ---
 
-## 3. Structure du Répertoire
+## 🏗️ Architecture du Pipeline (Zone Silver)
+
+Le pipeline est découpé en trois modules autonomes et idempotents :
+
+### 1. Extraction Stratégique (`04_extract.py`)
+- **Rôle :** Filtrage du "bruit". On ne conserve que les variables à haut signal.
+- **Scope :** Quartier "Élysée" exclusivement.
+- **Variables clés :** `price`, `availability_365`, `host_listings_count`, etc.
+- [Détails de la stratégie d'extraction](README_EXTRACT.md)
+
+### 2. Nettoyage & Feature Engineering IA (`05_transform.py`)
+- **Nettoyage :** Normalisation des taux de réponse, gestion des types de données et imputation des valeurs manquantes (NaN).
+- **IA Multimodale :** 
+    - **Vision :** Détection du score de standardisation ("Airbnb-style").
+    - **NLP :** Analyse des nuisances de voisinage via les commentaires.
+- [Détails des transformations et prompts IA](README_TRANSFORM.md)
+
+### 3. Chargement Relationnel (`06_load.py`)
+- **Technologie :** SQLAlchemy + Psycopg2.
+- **Cible :** Table PostgreSQL `elysee_listings_silver`.
+- **Propriété :** Idempotent (peut être relancé sans doublons grâce au mode `replace`).
+- [Documentation du Data Warehouse](README_LOAD.md)
+
+---
+
+## 📂 Structure du Dépôt
 ```text
 .
-├── 00_data.ipynb                 # Notebook d'exploration initiale
-├── 01_ingestion_images.py        # Script optimisé (Parallel Ingestion)
-├── 02_ingestion_texts.py         # Script optimisé (Pandas + Parallel Writing)
-├── 03_sanity_check.py            # Script d'audit croisé (Sanity Check)
-├── listings.csv                  # Référentiel source des annonces
-├── reviews.csv                   # Base source des commentaires
-├── README.md                     # Documentation et rapport de livraison (ce fichier)
-└── data/                         # Racine du Data Lake
-    └── raw/
-        ├── images/               # Images ingérées (320x320 px, JPEG)
-        └── texts/                # Corpus NLP ingéré (.txt)
+├── scripts/
+│   ├── 01_ingestion_images.py   # Phase 1 : Ingestion Images
+│   ├── 02_ingestion_texts.py    # Phase 1 : Ingestion Textes
+│   ├── 03_sanity_check.py       # Phase 1 : Audit de complétude
+│   ├── 04_extract.py            # Phase 2 : Filtrage métier
+│   ├── 05_transform.py          # Phase 2 : Nettoyage & IA
+│   └── 06_load.py               # Phase 2 : Injection PostgreSQL
+├── README_EXTRACT.md            # Justification des features
+├── README_DATAPROFILING.md      # Audit de santé des données
+├── README_TRANSFORM.md          # Logique d'enrichissement IA
+├── README_LOAD.md               # Guide d'intégration BDD
+├── README_DATALAKE.md           # Vue d'ensemble Bronze/Silver
+└── README.md                    # Ce fichier (Guide Principal)
 ```
 
 ---
 
-## 4. Notice d'Exécution (Mode Cloud Colab)
+## 🛠️ Installation & Utilisation
 
-**Étape 1 : Connexion Drive**
-Montez votre Google Drive dans un notebook Colab :
-```python
-from google.colab import drive
-drive.mount('/content/drive')
-os.chdir('/content/drive/MyDrive/Data Collection Project')
-```
+### Prérequis
+- Python 3.x
+- Un serveur **PostgreSQL** local ou distant.
+- Une clé API **Google AI Studio** (Gemini).
 
-**Étape 2 : Installation des Dépendances**
+### Setup
+1. **Clonage :**
+   ```bash
+   git clone https://github.com/tahaelafdel/-Livrable_2_ETL.git
+   cd -Livrable_2_ETL
+   ```
+2. **Dépendances :**
+   ```bash
+   pip install pandas Pillow requests google-generativeai sqlalchemy psycopg2-binary python-dotenv
+   ```
+3. **Configuration :** Créez un fichier `.env` à la racine :
+   ```env
+   GEMINI_API_KEY=votre_cle
+   DB_USER=votre_user
+   DB_PASSWORD=votre_pass
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=immovision_db
+   ```
+
+### Exécution du pipeline
 ```bash
-!pip install pandas Pillow requests
-```
-
-**Étape 3 : Lancement du Pipeline**
-```bash
-!python 01_ingestion_images.py
-!python 02_ingestion_texts.py
-!python 03_sanity_check.py
+python scripts/04_extract.py
+python scripts/05_transform.py
+python scripts/06_load.py
 ```
 
 ---
 
-## 5. Audit des Données (Résultats Finaux)
-
-Suite à l'exécution optimisée sur Google Colab, voici le bilan de santé du Data Lake pour le quartier **Élysée** :
-
-- **Périmètre cible** : Élysée
-- **Nombre total d'annonces de référence** : 2625
-
-**Bilan Images (.jpg) :**
-- Images attendues théoriquement : 2625
-- Images physiquement présentes : **2490**
-- Taux de complétion : **94.86%**
-- Pertes (erreurs DL / liens morts) : 135 (5.14%)
-
-**Bilan Textes (.txt) :**
-- Fichiers textes attendus (annonces avec commentaires) : 1965
-- Fichiers textes physiquement présents : **1965**
-- Taux de complétion : **100.00%**
-- Note : 3 fichiers textes semblent anormalement vides/petits et nécessiteront une vérification manuelle.
-
-**Cohérence Croisée (Multimodale) :**
-- Annonces avec image mais SANS texte (ex: pas d'avis voyageurs) : 622
-- Annonces avec texte mais SANS image (ex: erreur de téléchargement) : 97
-
----
-
-## 6. Analyse des Pertes (Data Loss Analysis)
-
-La déperdition de ~5% sur les images est structurelle et s'explique par :
-1. **Liens morts (404/410) :** Annonces supprimées ou photos purgées du CDN Airbnb depuis le dernier export Open Data.
-2. **Timeouts réseau :** Latence serveurs distants dépassant les 10s de sécurité.
-3. **Fichiers corrompus :** Encodages exotiques non supportés par Pillow lors de la conversion RGB.
-
-L'écart entre le nombre d'images (2490) et de textes (1965) est normal : de nombreuses annonces n'ont tout simplement pas encore reçu d'avis clients, bien que leur photo soit valide.
+## 📊 État de santé des données (Zone Bronze)
+L'audit de santé réalisé lors de la transformation a révélé que la colonne `price` du jeu de données source était vide. L'analyse économique de la Phase 2 se concentre donc sur la **disponibilité** et la **concentration de propriétés** par hôte (jusqu'à 816 annonces pour un seul hôte, signe d'une gestion industrielle massive).
