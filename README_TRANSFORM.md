@@ -1,29 +1,29 @@
-# README_TRANSFORM.md - AI Enrichment & Cleaning
+# README_TRANSFORM.md - Enrichissement IA & Nettoyage
 
-This document describes the transformation logic applied to create the Silver Zone dataset: `data/processed/transformed_elysee.csv`.
+Ce document décrit la logique de transformation appliquée pour créer le jeu de données de la Zone Silver : `data/processed/transformed_elysee.csv`.
 
-## 1. Cleaning & Normalization Rules
-- **Response Rate:** The `host_response_rate` string (e.g., "95%") was converted to a float (0.95). Missing values were imputed with **0** (assuming no response is a negative indicator).
-- **Superhost Status:** The `host_is_superhost` flag ('t'/'f') was converted to binary (1/0). Missing values were treated as **0**.
-- **Response Time:** Missing `host_response_time` values were filled with **"unknown"**.
-- **Price:** Although the source column was empty, it was cast to float to maintain schema consistency.
+## 1. Règles de Nettoyage & Normalisation
+- **Taux de réponse :** La chaîne `host_response_rate` (ex: "95%") a été convertie en float (0.95). Les valeurs manquantes sont imputées par **0** (l'absence de réponse est considérée comme un indicateur négatif).
+- **Statut Superhost :** Le drapeau `host_is_superhost` ('t'/'f') a été converti en binaire (1/0). Les valeurs manquantes sont traitées comme **0**.
+- **Délai de réponse :** Les valeurs manquantes de `host_response_time` sont remplacées par **"unknown"**.
+- **Prix :** Bien que la colonne source soit vide, elle a été forcée en type float pour garantir la cohérence du schéma SQL.
 
-## 2. Multimodal AI Enrichment (Gemini)
-The dataset was enriched with two new analytical features. Due to API quota constraints for the pilot phase, these columns are currently populated with randomized categorical scores as per instructions.
+## 2. Enrichissement par IA Multimodale (Gemini)
+Le jeu de données a été enrichi de deux nouvelles variables analytiques. Pour cette phase pilote, ces colonnes sont peuplées de scores catégoriels aléatoires (selon les consignes pour préserver les quotas d'API).
 
-### Feature 1: `standardization_score` (Vision)
-- **Concept:** Analyzes listing images to detect "industrialized" vs. "personal" decor.
-- **Mapping:**
-    - `1`: **Industrialized** (Minimalist, hotel-style, "Airbnb-style").
-    - `0`: **Personal** (Warm, lived-in, unique decor).
-    - `-1`: **Other/Unknown** (No image or non-interior photo).
+### Variable 1 : `standardization_score` (Vision)
+- **Concept :** Analyse les images des annonces pour détecter une décoration "industrialisée" par rapport à une décoration "personnelle".
+- **Mapping :**
+    - `1` : **Industrialisé** (Minimaliste, style hôtel, "Airbnb-style").
+    - `0` : **Personnel** (Chaleureux, habité, décoration unique).
+    - `-1` : **Autre/Inconnu** (Pas d'image ou photo non intérieure).
 
-### Feature 2: `neighborhood_impact` (NLP)
-- **Concept:** Analyzes guest comments to detect social nuisances or community integration.
-- **Mapping:**
-    - `1`: **Nuisance** (Noise complaints, automated lockbox mentions, party issues).
-    - `0`: **Neutral**.
-    - `-1`: **Positive Impact** (Mention of local tips, interaction with host).
+### Variable 2 : `neighborhood_impact` (NLP)
+- **Concept :** Analyse les commentaires des voyageurs pour détecter les nuisances sociales ou l'intégration communautaire.
+- **Mapping :**
+    - `1` : **Nuisance** (Plaintes pour bruit, mention de boîtiers à clés, fêtes).
+    - `0` : **Neutre**.
+    - `-1` : **Impact Positif** (Conseils locaux du propriétaire, interaction humaine forte).
 
-## 3. Implementation Details
-The transformation is handled by `scripts/05_transform.py`, which is designed to be idempotent and can be re-run to update scores once full API access is established.
+## 3. Détails d'Implémentation
+La transformation est orchestrée par le script `05_transform.py`. Il est conçu pour être idempotent et pourra être relancé pour mettre à jour les scores réels une fois l'accès complet aux API activé.

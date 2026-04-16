@@ -1,28 +1,28 @@
-# README_EXTRACT.md - Strategic Selection for Élysée Neighborhood
+# README_EXTRACT.md - Sélection Stratégique pour le Quartier Élysée
 
-This document justifies the selection of features from the raw `listings.csv` for the transition to the Silver Zone.
+Ce document justifie le choix des variables extraites du fichier brut `listings.csv` pour la transition vers la Zone Silver.
 
-## Objective
-To filter out the noise from the 70+ columns of the Bronze Zone and retain only the high-signal features that will serve as the foundation for urban policy hypotheses for the Mayor of Paris.
+## Objectif
+Filtrer le "bruit" des 70+ colonnes de la Zone Bronze pour ne conserver que les indicateurs à haut signal qui serviront de base aux hypothèses de politique urbaine pour la Mairie de Paris.
 
-## Selected Features & Hypotheses Mapping
+## Cartographie des Variables & Hypothèses
 
-### A. Economic Hypothesis: The Concentration of Wealth
-**Question:** Is this a sharing economy or a masked hotel industry?
-- `price`: Essential for understanding the economic weight of the sector.
-- `property_type` & `room_type`: To distinguish between traditional homes and specialized accommodation.
-- `availability_365`: To detect properties that are fully dedicated to tourist rentals.
-- `host_listings_count` & `calculated_host_listings_count`: Crucial indicators of professionalization (multi-owners vs. single-property residents).
+### A. Hypothèse Économique : La Concentration des Biens
+**Question :** S'agit-il d'une économie de partage ou d'une industrie hôtelière masquée ?
+- `price` : Essentiel pour comprendre le poids économique du secteur.
+- `property_type` & `room_type` : Pour distinguer les logements traditionnels des hébergements spécialisés.
+- `availability_365` : Pour détecter les biens entièrement dédiés à la location touristique.
+- `host_listings_count` & `calculated_host_listings_count` : Indicateurs cruciaux de professionnalisation (multi-propriétaires vs résidents uniques).
 
-### B. Social Hypothesis: The Dehumanization of Hospitality
-**Question:** Is the social bond between host and guest being lost?
-- `host_response_time` & `host_response_rate`: Fast, 100% automated responses are often a sign of professional management agencies.
-- `host_is_superhost`: To analyze the correlation between "superhost" status and the level of standardization.
-- `number_of_reviews`: Provides context for the reliability of social data.
+### B. Hypothèse Sociale : La Déshumanisation de l'Accueil
+**Question :** Le lien social entre l'hôte et le voyageur se perd-il ?
+- `host_response_time` & `host_response_rate` : Des réponses rapides et à 100 % sont souvent le signe d'agences de gestion automatisées.
+- `host_is_superhost` : Pour analyser la corrélation entre le statut "superhost" et le niveau de standardisation.
+- `number_of_reviews` : Donne du contexte sur la fiabilité des données sociales.
 
-### C. Technical & Identification
-- `id`: Unique identifier required to link tabular data with multimodal data (images in `data/raw/images/` and texts in `data/raw/texts/`).
+### C. Lien Technique & Identification
+- `id` : Identifiant unique nécessaire pour lier les données tabulaires aux données multimodales (images dans `data/raw/images/` et textes dans `data/raw/texts/`).
 
-## Filtering Logic
-- **Neighborhood:** The dataset is strictly limited to the **"Élysée"** neighborhood (Paris 8th arrondissement).
-- **Result:** 2,625 listings were successfully extracted.
+## Logique de Filtrage
+- **Quartier :** Le jeu de données est strictement limité au quartier **"Élysée"** (8ème arrondissement de Paris).
+- **Résultat :** 2 625 annonces ont été extraites avec succès.

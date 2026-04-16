@@ -1,35 +1,35 @@
-# README_DATAPROFILING.md - Data Quality Audit for Élysée
+# README_DATAPROFILING.md - Audit de Qualité des Données (Élysée)
 
-This document details the health of the filtered dataset `data/processed/filtered_elysee.csv` (2,625 rows).
+Ce document détaille l'état de santé du jeu de données filtré `data/processed/filtered_elysee.csv` (2 625 lignes).
 
-## Missing Values (NaN) Audit
-| Column | Missing % | Strategy |
+## Audit des Valeurs Manquantes (NaN)
+| Colonne | % Manquant | Stratégie |
 | :--- | :--- | :--- |
-| `id` | 0% | None |
-| `price` | **100%** | **CRITICAL:** Data missing from source. Economic hypothesis cannot be fully tested with current tabular data. |
-| `host_response_time` | 25.94% | Imputation: "N/A" (indicates irregular/unprofessional hosting). |
-| `host_response_rate` | 25.94% | Imputation: 0% or mean. Logic: No response = 0. |
-| `host_is_superhost` | 4.91% | Drop rows or impute "f" (false). |
-| `host_listings_count` | 0% | None |
-| `availability_365` | 0% | None |
+| `id` | 0% | Aucune |
+| `price` | **100%** | **CRITIQUE :** Donnée absente de la source. L'hypothèse économique ne peut pas être testée via les prix tabulaires actuels. |
+| `host_response_time` | 25.94% | Imputation : "unknown" (indique souvent un hébergement irrégulier ou non professionnel). |
+| `host_response_rate` | 25.94% | Imputation : 0%. Logique : Pas de réponse = 0. |
+| `host_is_superhost` | 4.91% | Imputation : 0 (false). |
+| `host_listings_count` | 0% | Aucune |
+| `availability_365` | 0% | Aucune |
 
-## Statistics & Outliers
-- **Calculated Host Listings Count:**
-    - Min: 1
-    - Max: 816 (Clear indicator of massive professionalization)
-    - Median: 3
-- **Availability 365:**
-    - Min: 0 days
-    - Max: 365 days
-    - Mean: 174 days
-- **Prices:**
-    - No data available to detect outliers (0€ or 15,000€).
+## Statistiques & Valeurs Aberrantes
+- **Nombre de propriétés par hôte (Calculated Host Listings Count) :**
+    - Min : 1
+    - Max : 816 (Indicateur clair d'une professionnalisation massive)
+    - Médiane : 3
+- **Disponibilité (Availability 365) :**
+    - Min : 0 jour
+    - Max : 365 jours
+    - Moyenne : 174 jours
+- **Prix (Price) :**
+    - Aucune donnée disponible pour détecter des valeurs aberrantes (0€ ou 15 000€).
 
-## Cleaning & Normalization Rules for Milestone 3
-1. **Price Handling:** Since the `price` column is empty, we will focus on `availability_365` and `host_listings_count` for the economic hypothesis.
-2. **Type Conversion:** 
-    - `host_response_rate`: Convert "95%" string to float 0.95.
-    - `host_is_superhost`: Convert "t"/"f" to boolean/int.
-3. **NaN Imputation:**
-    - `host_response_time`: Replace NaN with "unknown".
-    - `host_response_rate`: Replace NaN with 0.
+## Règles de Nettoyage & Normalisation (Milestone 3)
+1. **Gestion des Prix :** La colonne étant vide, l'analyse se concentre sur `availability_365` et `host_listings_count`.
+2. **Conversion de Types :** 
+    - `host_response_rate` : Conversion du texte "95%" en float 0.95.
+    - `host_is_superhost` : Conversion des drapeaux "t"/"f" en binaire 1/0.
+3. **Imputation Logique :**
+    - Remplacement des NaN par des valeurs neutres ou négatives selon le contexte métier (ex: 0 pour le taux de réponse).
+埋
